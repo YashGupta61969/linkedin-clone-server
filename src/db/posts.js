@@ -4,7 +4,9 @@ const postsSchema = mongoose.Schema({
     author: {
         _id:String,
         name:String,
-        email:String
+        email:String,
+        about:String,
+        image:String
     },
     caption: {
         type: String,
@@ -16,7 +18,8 @@ const postsSchema = mongoose.Schema({
         {
             _id:String,
             name: String,
-            email: String
+            email: String,
+            image:String
         }
     ],
     comments: [

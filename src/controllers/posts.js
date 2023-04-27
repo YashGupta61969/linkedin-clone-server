@@ -1,29 +1,37 @@
 const Posts = require("../db/posts");
 const Users = require("../db/users");
 
+const getAllPosts = async (req, res) => {
+    try {
+        const response = await Posts.find({});
+        res.send(response)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+}
+
 const addPosts = async (req, res) => {
     try {
         const { authorId, caption, image } = req.body;
 
-        const author = await Users.findOne({ _id: authorId }).select({ _id: 1, name: 1, email: 1 })
+        const author = await Users.findByIdAndUpdate(authorId, {
+            $push: {
+                posts: {
+                    caption,
+                    image
+                }
+            }
+        }).select({ _id: 1, name: 1, email: 1, image: 1, about: 1 });
+
         const response = await Posts.create({
             author,
             caption: caption || '',
             image: image || '',
         })
 
-        await Users.findByIdAndUpdate(authorId,{
-            $push:{
-                posts:{
-                    _id:response._id,
-                    caption,
-                    image
-                }
-            }
-        })
         res.send(response);
     } catch (error) {
-        res.send(error)
+        res.status(500).send(error)
     }
 }
 
@@ -43,19 +51,16 @@ const deletePost = async (req, res) => {
         const response = await Posts.findByIdAndDelete(id)
         res.send(response);
     } catch (error) {
-        res.send(error)
+        res.status(500).send(error)
     }
 }
 
-const addLikes = async (req, res) => {
+const addLike = async (req, res) => {
     try {
         const { id } = req.params;
         const { userid } = req.query;
-        const user = await Users.findOne({ _id: userid }).select({ _id: 1, name: 1, email: 1 })
+        const user = await Users.findOne({ _id: userid }).select({ _id: 1, name: 1, email: 1, image: 1 })
         const response = await Posts.updateOne({ _id: id }, {
-            $inc: {
-                likesCount: 1
-            },
             $push: {
                 likedBy: user
             }
@@ -66,14 +71,11 @@ const addLikes = async (req, res) => {
     }
 }
 
-const removeLikes = async (req, res) => {
+const removeLike = async (req, res) => {
     try {
         const { id } = req.params;
         const { likeid } = req.query;
         const response = await Posts.findByIdAndUpdate(id, {
-            $inc: {
-                likes: -1
-            },
             $pull: {
                 likedBy: { _id: likeid }
             },
@@ -85,9 +87,10 @@ const removeLikes = async (req, res) => {
 }
 
 module.exports = {
+    getAllPosts,
     addPosts,
     updatePost,
     deletePost,
-    addLikes,
-    removeLikes
+    addLike,
+    removeLike
 }

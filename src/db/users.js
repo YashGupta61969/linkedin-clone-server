@@ -15,28 +15,24 @@ const usersSchema = mongoose.Schema({
       required: true
    },
    image: String,
-   about:String,
+   about: String,
    posts: [
       {
          caption: String,
          image: String,
+         likedBy: [String]
       }
    ],
    experiences: [
       {
          companyName: String,
+         duration:String,
          role: String
       }
    ],
-   skills: {
-      type: Array,
-   },
-   followers: {
-      type: Array
-   },
-   following: {
-      type: Array
-   }
+   skills: [String],
+   followers: [String],
+   following: [String]
 })
 
 const Users = mongoose.model('User', usersSchema)

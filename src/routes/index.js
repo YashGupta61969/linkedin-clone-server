@@ -1,9 +1,10 @@
 const express = require('express')
 const { login, addSkills, getAllUsers, signup, removeSkills, getSingleUser, updateUser } = require('../controllers/users')
 const auth = require('../middlewares/auth')
-const { addPosts, updatePost, deletePost, getAllPosts, addLike, removeLike } = require('../controllers/posts')
+const { addPosts, updatePost, deletePost, getAllPosts, addLike, removeLike, getSinglePost } = require('../controllers/posts')
 const { addComment, updateComment, deleteComment } = require('../controllers/comments')
 const { addExperience, updateExperience, deleteExperience } = require('../controllers/expriences')
+const { follow, unFollow } = require('../controllers/follow')
 const upload = require('../middlewares/multer')
 
 const router = express.Router()
@@ -21,13 +22,18 @@ router.patch('/removeskills/:id', removeSkills)
 
 // posts
 router.get('/post/', getAllPosts)
+router.get('/post/:id', getSinglePost)
 router.post('/post/', upload, addPosts)
 router.patch('/post/:id', updatePost)
 router.delete('/post/:id', deletePost)
 
 // likes
 router.patch('/like/:id', addLike)
-router.delete('/like/:id', removeLike)
+router.patch('/unlike/:id', removeLike)
+
+// follow
+router.post('/follow', follow)
+router.post('/unfollow', unFollow)
 
 // Comments
 router.post('/comment/:id', addComment)

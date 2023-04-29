@@ -34,7 +34,6 @@ const login = async (req, res) => {
         const response = await Users.findOne({ email: req.body.email }).select({ __v: 0 });
         if (response) {
             const isPasswordCorrect = await bcrypt.compare(password, response.password)
-
             if (isPasswordCorrect) {
                 res.send({ response, token })
             } else {
@@ -50,8 +49,9 @@ const login = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
-        const hash = await bcrypt.hash(req.body.password, 10)
-        const newObject = { ...req.body, password: hash, image:`http://localhost:8000/public/${req.file.filename.replace('./','')}` }
+        const hash = await bcrypt.hash(req.body.password, 10);
+        const image = req.file ? `http://localhost:8000/public/${req.file.filename}` : '';
+        const newObject = { ...req.body, password: hash, image }
         const response = await Users.create(newObject)
         res.send(response)
     } catch (error) {

@@ -10,9 +10,20 @@ const getAllPosts = async (req, res) => {
     }
 }
 
+const getSinglePost = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const response = await Posts.findById(id);
+        res.send(response)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+}
+
 const addPosts = async (req, res) => {
     try {
-        const { authorId, caption, image } = req.body;
+        const { authorId, caption } = req.body;
+        const image = req.file ? `http://localhost:8000/public/${req.file.filename}` : '';
 
         const author = await Users.findByIdAndUpdate(authorId, {
             $push: {
@@ -25,8 +36,8 @@ const addPosts = async (req, res) => {
 
         const response = await Posts.create({
             author,
-            caption: caption || '',
-            image: image || '',
+            caption,
+            image,
         })
 
         res.send(response);
@@ -59,10 +70,10 @@ const addLike = async (req, res) => {
     try {
         const { id } = req.params;
         const { userid } = req.query;
-        const user = await Users.findOne({ _id: userid }).select({ _id: 1, name: 1, email: 1, image: 1 })
+
         const response = await Posts.updateOne({ _id: id }, {
             $push: {
-                likedBy: user
+                likedBy: userid
             }
         })
         res.send(response)
@@ -75,19 +86,21 @@ const removeLike = async (req, res) => {
     try {
         const { id } = req.params;
         const { likeid } = req.query;
+
         const response = await Posts.findByIdAndUpdate(id, {
             $pull: {
-                likedBy: { _id: likeid }
+                likedBy: likeid
             },
-        }, { new: true })
+        })
         res.send(response)
     } catch (error) {
-        res.send(error)
+        res.status(500).send(error)
     }
 }
 
 module.exports = {
     getAllPosts,
+    getSinglePost,
     addPosts,
     updatePost,
     deletePost,

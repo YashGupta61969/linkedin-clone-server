@@ -5,10 +5,12 @@ const addComment = async (req, res) => {
     try {
         const { id } = req.params;
         const { message, userid } = req.body;
-        const user = await Users.findById(userid).select({ name: 1, email: 1 })
+
+        const user = await Users.findById(userid).select({ _id: 1, name: 1, image: 1 })
+
         const response = await Posts.findByIdAndUpdate(id, {
             $push: {
-                comments: { ...user, message }
+                comments: { author: user, message }
             }
         }, { new: true });
         res.send(response)
